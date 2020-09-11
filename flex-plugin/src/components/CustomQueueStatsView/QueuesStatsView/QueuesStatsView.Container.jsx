@@ -95,9 +95,9 @@ class QueueStatsViewContainer extends React.Component {
 
     const workersByQueue = Array.from(workers.values()).reduce(
       (workersByQueue, worker) => {
-        const { teams } = worker.attributes;
+        const { routing: { skills } } = worker.attributes;
 
-        teams.forEach(team => {
+        skills.forEach(team => {
           const workersAlreadyComputed =
             (workersByQueue.get(team) &&
               workersByQueue.get(team)[worker.activity_name.toLowerCase()]) ||

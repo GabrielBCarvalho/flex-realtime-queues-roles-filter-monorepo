@@ -8,6 +8,8 @@ This plugin allows you to filter which realtime stats the current Flex user is g
 1. Clone this repository
 2. Copy `.env.example` to `.env` and set the following variables:
     - REACT_APP_SELECTION_ATTRIBUTE: attribute the plugin will check to select workers inside that permission group. The same attribute is checked in the current Flex user.
+    - REACT_APP_FUNCTIONS_DOMAIN: the base domain which the Twilio functions are running. You can find the required functions on the root of this monorepo.
+
 3. Copy `src/config/supervisors.example.json` to `src/config/supervisors.json`. This file contains the supervisors with the queues they are allowed to see. 
 4. Check the following section to run and deploy your plugin.
 
