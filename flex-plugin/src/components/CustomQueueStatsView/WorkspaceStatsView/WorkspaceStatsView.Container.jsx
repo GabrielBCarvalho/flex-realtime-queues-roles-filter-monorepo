@@ -46,13 +46,19 @@ class WorkspaceStatsViewContainer extends React.Component {
 
     const activityStatistics = getInitialAcitvityStatistics();
     const workers = new Map();
-    
+
     // TODO: build expression to support multiple teams
     const { REACT_APP_SELECTION_ATTRIBUTE } = process.env;
 
+    const workersExpression = workerAttributes[
+      REACT_APP_SELECTION_ATTRIBUTE
+    ].map(
+      attr => `data.attributes.${REACT_APP_SELECTION_ATTRIBUTE} == "${attr}"`
+    ).join(' OR ');
+
     const liveQuery = await manager.insightsClient.liveQuery(
       'tr-worker',
-      `data.attributes.${REACT_APP_SELECTION_ATTRIBUTE} == "${workerAttributes[REACT_APP_SELECTION_ATTRIBUTE]}"`
+      workersExpression
     );
 
     const items = Object.values(liveQuery.getItems());
@@ -68,7 +74,7 @@ class WorkspaceStatsViewContainer extends React.Component {
 
     setWorkspaceStats({
       workers,
-      activity_statistics: activityStatistics,
+      activity_statistics: activityStatistics
     });
 
     this.setState({ workersLiveQuery: liveQuery });
@@ -117,7 +123,7 @@ class WorkspaceStatsViewContainer extends React.Component {
       removedWorker.activity_name.toLowerCase()
     ];
 
-    if(activity_statistics[removedWorker]) {
+    if (activity_statistics[removedWorker]) {
       activity_statistics[removedWorker].workers = oldWorkersCount - 1;
     }
 
@@ -140,19 +146,27 @@ class WorkspaceStatsViewContainer extends React.Component {
       wrapping: 0
     };
 
-    const supervisor = supervisors.find((supervisor) => supervisor.email === attributes.email)
+    const supervisor = supervisors.find(
+      supervisor => supervisor.email === attributes.email
+    );
     const queuesListExpression = supervisor.queues
       .map(queue => `"${queue}"`)
-      .join(",");
+      .join(',');
 
-    const liveQuery = await manager.insightsClient.liveQuery('tr-task', `data.queue_name IN [${queuesListExpression}]`);
+    const liveQuery = await manager.insightsClient.liveQuery(
+      'tr-task',
+      `data.queue_name IN [${queuesListExpression}]`
+    );
     liveQuery.on('itemUpdated', this.handleTaskUpdate);
     liveQuery.on('itemRemoved', this.handleTaskRemoval);
 
     const { token } = manager.store.getState().flex.session.ssoTokenPayload;
-    const res = await fetch(`${process.env.REACT_APP_FUNCTIONS_DOMAIN}/tasks/list?Token=${token}`, {
-      mode: 'cors',
-    });
+    const res = await fetch(
+      `${process.env.REACT_APP_FUNCTIONS_DOMAIN}/tasks/list?Token=${token}`,
+      {
+        mode: 'cors'
+      }
+    );
 
     const { tasks } = await res.json();
     const tasksList = new Map();
@@ -166,7 +180,6 @@ class WorkspaceStatsViewContainer extends React.Component {
       tasksList.set(task.task_sid, task);
     });
 
-
     setWorkspaceStats({
       tasks_by_status: tasksByStatus,
       tasks_list: tasksList
@@ -177,7 +190,7 @@ class WorkspaceStatsViewContainer extends React.Component {
 
   isTaskReservedForAnotherTeam(task) {
     const { workers } = this.props.workspaceStats;
-  
+
     return task.status !== 'pending' && !workers.has(task.worker_sid);
   }
 
